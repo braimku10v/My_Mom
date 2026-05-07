@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Апама Туулган Күн Куттуктоо</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rose: #e8a0b4;
+    --rose-deep: #c9607d;
+    --blush: #f7dde6;
+    --cream: #fdf6f0;
+    --lavender: #d4b8d8;
+    --sage: #b5c9b7;
+    --gold: #c9a96e;
+    --text-dark: #4a3040;
+    --text-mid: #7a5060;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--cream);
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--text-dark);
+  }
+
+  /* ── SCENES ── */
+  .scene {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 1.2s ease;
+  }
+  .scene.active { opacity: 1; pointer-events: all; }
+
+  /* ── PETAL CANVAS ── */
+  #petalCanvas {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── BACKGROUND GRADIENT ── */
+  .bg-gradient {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(ellipse at 30% 20%, #fce8ef 0%, #fdf6f0 40%, #f0e8f5 100%);
+    animation: bgShift 20s ease-in-out infinite alternate;
+  }
+  @keyframes bgShift {
+    0%   { background: radial-gradient(ellipse at 30% 20%, #fce8ef 0%, #fdf6f0 40%, #f0e8f5 100%); }
+    100% { background: radial-gradient(ellipse at 70% 80%, #f5e8fa 0%, #fdf6f0 40%, #fce8ef 100%); }
+  }
+
+  /* ── SCENE 1 – opening ── */
+  #scene1 { z-index: 10; }
+  .opening-line {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+    color: var(--rose-deep);
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 1.4s ease forwards;
+  }
+  .opening-date {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    color: var(--text-mid);
+    letter-spacing: .1em;
+    margin-top: .6rem;
+    opacity: 0;
+    animation: fadeUp 1.4s ease 0.8s forwards;
+  }
+  .big-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 10vw, 7rem);
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1;
+    margin: 1.2rem 0 .6rem;
+    opacity: 0;
+    animation: fadeUp 1.6s ease 1.4s forwards;
+  }
+  .big-title span { color: var(--rose-deep); }
+  .subtitle {
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--text-mid);
+    opacity: 0;
+    animation: fadeUp 1.4s ease 2.2s forwards;
+  }
+
+  /* ── SCENE 2 – sakura ── */
+  #scene2 { z-index: 9; overflow: hidden; }
+  #sakuraCanvas { position: absolute; inset: 0; pointer-events: none; }
+
+  /* ── SCENE 3 – poem ── */
+  #scene3 { z-index: 8; }
+  .poem-wrapper {
+    max-width: min(680px, 90vw);
+    padding: 3rem 2.5rem;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(232,160,180,0.35);
+    border-radius: 2px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 60px rgba(201,96,125,0.1);
+    position: relative;
+  }
+  .poem-wrapper::before, .poem-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 60px; height: 60px;
+    border-color: var(--rose);
+    border-style: solid;
+    opacity: .5;
+  }
+  .poem-wrapper::before { top: 12px; left: 12px; border-width: 1px 0 0 1px; }
+  .poem-wrapper::after  { bottom: 12px; right: 12px; border-width: 0 1px 1px 0; }
+
+  .poem-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--rose-deep);
+    text-align: center;
+    margin-bottom: 1.8rem;
+    opacity: 0;
+    animation: fadeUp 1s ease .2s forwards;
+  }
+  .poem-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+    font-style: italic;
+    line-height: 1.9;
+    color: var(--text-dark);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .poem-separator {
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rose), transparent);
+    margin: 1.4rem auto;
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+  }
+
+  /* ── SCENE 4 – wish ── */
+  #scene4 { z-index: 7; }
+  .wish-inner { text-align: center; max-width: 700px; padding: 0 2rem; }
+  .wish-greeting {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 8vw, 5.5rem);
+    font-style: italic;
+    color: var(--rose-deep);
+    line-height: 1.1;
+    opacity: 0;
+    animation: scaleIn 1.4s ease .2s forwards;
+  }
+  .wish-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 2.8vw, 1.55rem);
+    color: var(--text-mid);
+    line-height: 1.8;
+    margin-top: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1.2s ease 1.2s forwards;
+  }
+  .wish-signature {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    color: var(--gold);
+    margin-top: 2rem;
+    letter-spacing: .08em;
+    opacity: 0;
+    animation: fadeUp 1.2s ease 2.2s forwards;
+  }
+
+  /* ── SCENE 5 – finale ── */
+  #scene5 { z-index: 6; }
+  .finale-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 6vw, 4rem);
+    font-weight: 700;
+    color: var(--text-dark);
+    text-align: center;
+    line-height: 1.3;
+    opacity: 0;
+    animation: scaleIn 1.6s ease .3s forwards;
+  }
+  .finale-text span { color: var(--rose-deep); }
+  .hearts {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    margin-top: 1rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.5s forwards;
+    letter-spacing: .3em;
+  }
+  .restart-btn {
+    margin-top: 2.5rem;
+    padding: .85rem 2.5rem;
+    background: transparent;
+    border: 1.5px solid var(--rose-deep);
+    border-radius: 2px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    letter-spacing: .15em;
+    color: var(--rose-deep);
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeUp 1s ease 2.5s forwards;
+    transition: background .3s, color .3s;
+  }
+  .restart-btn:hover { background: var(--rose-deep); color: #fff; }
+
+  /* ── NAV BAR ── */
+  #navBar {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    gap: 1.1rem;
+    padding: .9rem 1.5rem 1.6rem;
+    background: linear-gradient(to top, rgba(253,246,240,0.95) 0%, rgba(253,246,240,0) 100%);
+    pointer-events: none;
+  }
+  .nav-btn {
+    pointer-events: all;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 1.5px solid var(--rose-deep);
+    background: rgba(253,246,240,0.88);
+    backdrop-filter: blur(8px);
+    color: var(--rose-deep);
+    font-size: 1.15rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .25s, color .25s, transform .12s, opacity .3s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  .nav-btn:active  { transform: scale(.88); }
+  .nav-btn:hover   { background: var(--rose-deep); color: #fff; }
+  .nav-btn:disabled { opacity: .22; pointer-events: none; }
+
+  #dotRow { display: flex; gap: .55rem; align-items: center; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--rose); opacity: .3;
+    transition: opacity .4s, transform .4s;
+    cursor: pointer; pointer-events: all;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .dot.on { opacity: 1; transform: scale(1.5); }
+
+  /* ── KEYFRAMES ── */
+  @keyframes fadeUp {
+    0%   { opacity: 0; transform: translateY(22px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    0%   { opacity: 0; }
+    100% { opacity: .7; }
+  }
+  @keyframes scaleIn {
+    0%   { opacity: 0; transform: scale(.85); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* floating sparkles */
+  .sparkle {
+    position: fixed;
+    pointer-events: none;
+    font-size: 1rem;
+    animation: floatSpark linear infinite;
+    z-index: 1;
+    opacity: 0;
+  }
+  @keyframes floatSpark {
+    0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+    10%  { opacity: .8; }
+    90%  { opacity: .6; }
+    100% { opacity: 0; transform: translateY(-120vh) rotate(360deg); }
+  }
+
+  /* ── MUSIC BUTTON ── */
+  #musicBtn {
+    position: fixed; top: 1.2rem; right: 1.2rem; z-index: 300;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 1.5px solid var(--rose-deep);
+    background: rgba(253,246,240,0.88);
+    backdrop-filter: blur(8px);
+    color: var(--rose-deep);
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .25s, color .25s, transform .12s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-shadow: 0 2px 16px rgba(201,96,125,0.18);
+    animation: fadeUp 1s ease 3s both;
+  }
+  #musicBtn:hover  { background: var(--rose-deep); color: #fff; }
+  #musicBtn:active { transform: scale(.88); }
+  #musicBtn.muted  { opacity: .45; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #musicBtn.playing .note { display: inline-block; animation: spin 3s linear infinite; }
+</style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+<canvas id="petalCanvas"></canvas>
+
+<!-- background music -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- music toggle button -->
+<button id="musicBtn" class="playing" aria-label="Музыка">
+  <span class="note">🎵</span>
+</button>
+
+<!-- nav bar -->
+<div id="navBar">
+  <button class="nav-btn" id="btnPrev" disabled aria-label="Алдыңкы">&#8592;</button>
+  <div id="dotRow">
+    <div class="dot on" data-i="0"></div>
+    <div class="dot"    data-i="1"></div>
+    <div class="dot"    data-i="2"></div>
+    <div class="dot"    data-i="3"></div>
+    <div class="dot"    data-i="4"></div>
+  </div>
+  <button class="nav-btn" id="btnNext" aria-label="Кийинки">&#8594;</button>
+</div>
+
+<!-- ───── SCENE 1 ───── -->
+<div class="scene active" id="scene1">
+  <p class="opening-line">8-май</p>
+  <p class="opening-date" style="animation-delay:.8s">2026-жыл</p>
+  <h1 class="big-title"><span>Апаке</span></h1>
+
+</div>
+
+<!-- ───── SCENE 2 ───── -->
+<div class="scene" id="scene2">
+  <canvas id="sakuraCanvas"></canvas>
+</div>
+
+<!-- ───── SCENE 3 ───── -->
+<div class="scene" id="scene3">
+  <div class="poem-wrapper">
+    <p class="poem-title">♡ Апама ♡</p>
+
+    <p class="poem-line" id="pl1">Дүйнөдөгү эң кымбаттуу асылым,</p>
+    <p class="poem-line" id="pl2">Мээримиңиз — менин бактым, асылым.</p>
+    <p class="poem-line" id="pl3">Күн нурундай жылуу тийип мээримиң,</p>
+    <p class="poem-line" id="pl4">Жарык кылат турмушумдун ар кырын.</p>
+
+    <div class="poem-separator" style="animation-delay:2s"></div>
+
+    <p class="poem-line" id="pl5">Түн уйкуңду мага арнап бөлдүңүз,</p>
+    <p class="poem-line" id="pl6">Түйшүк тартып, биз деп гана күлдүңүз.</p>
+    <p class="poem-line" id="pl7">Талпынттыңыз, жетеледиңиз турмушта,</p>
+    <p class="poem-line" id="pl8">Бала үчүн баарын берип келдиңиз.</p>
+
+    <div class="poem-separator" style="animation-delay:4s"></div>
+
+    <p class="poem-line" id="pl9">Туулган күнүң куттуу болсун, Апаке,</p>
+    
+  </div>
+</div>
+
+<!-- ───── SCENE 4 ───── -->
+<div class="scene" id="scene4">
+  <div class="wish-inner">
+    <h2 class="wish-greeting">Куттуктайм,<br>Апаке!</h2>
+    <p class="wish-text">
+      Апакебай, аман болуп жүрүңүз,<br>
+      Ар дайым эле жайнап турсун жүзүңүз.<br>
+      
+      Сиз бар үчүн бул жашоодо бактылуумун,<br>
+      Көп жашаңыз, гүлдөп турсун өмүрүңүз!<br>
+    </p>
+    <p class="wish-signature">🌸</p>
+  </div>
+</div>
+
+<!-- ───── SCENE 5 ───── -->
+<div class="scene" id="scene5">
+  <p class="finale-text"><br><span>Сизди Чексиз Жакшы Кором</span></p>
+  <p class="hearts">🌸 💕 🌸</p>
+  <button class="restart-btn" id="restartBtn">Кайра көрүү</button>
+</div>
+
+<script>
+// ─── BACKGROUND PETAL CANVAS (all scenes) ────────────────
+const canvas = document.getElementById('petalCanvas');
+const ctx = canvas.getContext('2d');
+function resizeBg() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+const bgPetals = [];
+function createBgPetal() {
+  return {
+    x: Math.random() * canvas.width, y: -30,
+    size: 5 + Math.random() * 9,
+    speedY: 0.4 + Math.random() * 0.8,
+    speedX: (Math.random() - 0.5) * 0.5,
+    rot: Math.random() * 360, rotSpeed: (Math.random() - 0.5) * 1.2,
+    alpha: 0.25 + Math.random() * 0.35,
+    color: ['#f4b8cc','#f7dde6','#fce8ef','#f9d0e0','#ffe0ea'][Math.floor(Math.random()*5)]
+  };
+}
+for (let i = 0; i < 22; i++) { const p = createBgPetal(); p.y = Math.random()*canvas.height; bgPetals.push(p); }
+
+function drawBgPetal(p) {
+  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot*Math.PI/180); ctx.globalAlpha = p.alpha;
+  ctx.beginPath();
+  ctx.moveTo(0,-p.size);
+  ctx.bezierCurveTo(p.size*.55,-p.size*.55, p.size*.55,p.size*.55, 0,p.size);
+  ctx.bezierCurveTo(-p.size*.55,p.size*.55,-p.size*.55,-p.size*.55, 0,-p.size);
+  ctx.fillStyle = p.color; ctx.fill(); ctx.restore();
+}
+function animateBgPetals() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  bgPetals.forEach(p => {
+    p.y += p.speedY; p.x += p.speedX + Math.sin(p.y*.02)*.35; p.rot += p.rotSpeed;
+    if (p.y > canvas.height+40) Object.assign(p, createBgPetal());
+    drawBgPetal(p);
+  });
+  requestAnimationFrame(animateBgPetals);
+}
+animateBgPetals();
+
+// ─── SAKURA SCENE CANVAS ─────────────────────────────────
+const sc = document.getElementById('sakuraCanvas');
+const sctx = sc.getContext('2d');
+function resizeSakura() { sc.width = window.innerWidth; sc.height = window.innerHeight; }
+resizeSakura();
+window.addEventListener('resize', resizeSakura);
+
+// ── Sakura tree fractal drawing ──────────────────────────
+const PETAL_COLORS = ['#f9c8d8','#f4b0c8','#fce4ee','#f0a0c0','#fdd0e4','#f7e0ec'];
+
+let treeProgress = 0;   // 0→1 grow animation
+let petalBurst = false;
+const fallingPetals = [];
+let sakuraActive = false;
+
+// branch data: [{x1,y1,x2,y2,w,gen}]
+const branches = [];
+const blossoms = [];  // {x,y,r}
+
+function buildTree(x1, y1, angle, length, width, gen) {
+  if (gen > 11 || length < 3) return;
+  const rad = angle * Math.PI / 180;
+  const x2 = x1 + Math.cos(rad) * length;
+  const y2 = y1 + Math.sin(rad) * length;
+  branches.push({ x1, y1, x2, y2, w: width, gen });
+
+  if (gen > 7) {
+    // add blossom clusters at tips
+    for (let i = 0; i < 3; i++) {
+      blossoms.push({
+        x: x2 + (Math.random()-.5)*10,
+        y: y2 + (Math.random()-.5)*10,
+        r: 4 + Math.random()*5,
+        col: PETAL_COLORS[Math.floor(Math.random()*PETAL_COLORS.length)]
+      });
+    }
+    return;
+  }
+
+  const spread = 22 + gen * 2;
+  const lenRatio = 0.68 + Math.random() * 0.06;
+  buildTree(x2, y2, angle - spread + (Math.random()-0.5)*8, length*lenRatio, width*.68, gen+1);
+  buildTree(x2, y2, angle + spread + (Math.random()-0.5)*8, length*lenRatio, width*.68, gen+1);
+  if (gen < 5) buildTree(x2, y2, angle + (Math.random()-0.5)*12, length*lenRatio*.9, width*.55, gen+2);
+}
+
+function initTree() {
+  branches.length = 0; blossoms.length = 0;
+  const W = sc.width, H = sc.height;
+  // Two trees from bottom corners
+  buildTree(W*.22, H, -88, H*.32, 14, 0);
+  buildTree(W*.78, H, -92, H*.32, 14, 0);
+}
+
+// ── Meadow data ───────────────────────────────────────────
+const meadowGrass = [];   // {x, len, angle, col}
+const meadowFlowers = []; // {x, type, color, stemH, phase}
+
+function initMeadow() {
+  const W = sc.width, H = sc.height;
+  const groundY = H; // grass roots at bottom
+  meadowGrass.length = 0;
+  meadowFlowers.length = 0;
+
+  // Dense grass blades
+  for (let i = 0; i < 280; i++) {
+    meadowGrass.push({
+      x: Math.random() * W,
+      len: 18 + Math.random() * 38,
+      angle: -85 + (Math.random()-0.5)*28,
+      col: ['#7ab87a','#5fa05f','#8dcc6a','#4e9650','#a0d47a'][Math.floor(Math.random()*5)],
+      phase: Math.random()*Math.PI*2,
+      speed: 0.012 + Math.random()*0.008
+    });
+  }
+
+  // Meadow flowers: tulips, daisies, dandelions, small roses
+  const types = ['daisy','tulip','dandelion','rose'];
+  for (let i = 0; i < 42; i++) {
+    const type = types[Math.floor(Math.random()*types.length)];
+    const colors = {
+      daisy:     ['#fff8f0','#ffeedd','#fff0f5'],
+      tulip:     ['#f4a0b8','#e8607d','#c9d46e','#f9c8a0'],
+      dandelion: ['#fce97a','#f5d850','#ffed90'],
+      rose:      ['#e8a0b4','#c9607d','#f4b8cc']
+    };
+    const c = colors[type];
+    meadowFlowers.push({
+      x: 20 + Math.random() * (W - 40),
+      type,
+      color: c[Math.floor(Math.random()*c.length)],
+      stemH: 28 + Math.random() * 36,
+      phase: Math.random()*Math.PI*2,
+      speed: 0.008 + Math.random()*0.006,
+      size: 0.7 + Math.random()*0.6
+    });
+  }
+}
+
+// ── Draw a single meadow flower ───────────────────────────
+function drawMeadowFlower(f, groundY, growT, time) {
+  const rootY = groundY;
+  const sway = Math.sin(time * f.speed + f.phase) * 3;
+  const stemTop = rootY - f.stemH * growT;
+  const tipX = f.x + sway;
+
+  // stem
+  sctx.beginPath();
+  sctx.moveTo(f.x, rootY);
+  sctx.quadraticCurveTo(f.x + sway*0.5, rootY - f.stemH*growT*0.5, tipX, stemTop);
+  sctx.strokeStyle = '#5fa05f';
+  sctx.lineWidth = 1.6;
+  sctx.lineCap = 'round';
+  sctx.stroke();
+
+  if (growT < 0.5) return; // flower head appears at 50% stem growth
+  const headT = (growT - 0.5) / 0.5;
+  const s = f.size * headT;
+
+  sctx.save();
+  sctx.translate(tipX, stemTop);
+
+  if (f.type === 'daisy') {
+    // petals
+    for (let i = 0; i < 10; i++) {
+      const a = (i/10)*Math.PI*2;
+      sctx.beginPath();
+      sctx.ellipse(Math.cos(a)*s*7, Math.sin(a)*s*7, s*3.5, s*2, a, 0, Math.PI*2);
+      sctx.fillStyle = f.color; sctx.globalAlpha = .9; sctx.fill(); sctx.globalAlpha = 1;
+    }
+    sctx.beginPath(); sctx.arc(0,0,s*4,0,Math.PI*2);
+    sctx.fillStyle = '#f5d050'; sctx.fill();
+    sctx.beginPath(); sctx.arc(0,0,s*2,0,Math.PI*2);
+    sctx.fillStyle = '#e8b830'; sctx.fill();
+
+  } else if (f.type === 'tulip') {
+    // tulip cup
+    sctx.beginPath();
+    sctx.moveTo(-s*7, s*2);
+    sctx.bezierCurveTo(-s*9,-s*4, -s*6,-s*14, 0,-s*16);
+    sctx.bezierCurveTo(s*6,-s*14, s*9,-s*4, s*7,s*2);
+    sctx.bezierCurveTo(s*4,s*6, -s*4,s*6, -s*7,s*2);
+    sctx.fillStyle = f.color; sctx.globalAlpha = .92; sctx.fill(); sctx.globalAlpha = 1;
+    // inner sheen
+    sctx.beginPath();
+    sctx.moveTo(-s*2, 0);
+    sctx.bezierCurveTo(-s*2,-s*8, s*1,-s*13, s*1,-s*14);
+    sctx.strokeStyle = 'rgba(255,255,255,0.35)'; sctx.lineWidth = s*2; sctx.stroke();
+
+  } else if (f.type === 'dandelion') {
+    // fluffy rays
+    for (let i = 0; i < 20; i++) {
+      const a = (i/20)*Math.PI*2;
+      sctx.beginPath();
+      sctx.moveTo(0,0);
+      sctx.lineTo(Math.cos(a)*s*11, Math.sin(a)*s*11);
+      sctx.strokeStyle = f.color; sctx.lineWidth = s*1.2; sctx.globalAlpha=.8; sctx.stroke();
+      sctx.globalAlpha=1;
+      // tip dot
+      sctx.beginPath();
+      sctx.arc(Math.cos(a)*s*11, Math.sin(a)*s*11, s*1.8, 0, Math.PI*2);
+      sctx.fillStyle = '#fff9d0'; sctx.fill();
+    }
+    sctx.beginPath(); sctx.arc(0,0,s*3,0,Math.PI*2);
+    sctx.fillStyle = '#f5d850'; sctx.fill();
+
+  } else { // rose
+    for (let i = 0; i < 6; i++) {
+      const a = (i/6)*Math.PI*2;
+      sctx.beginPath();
+      sctx.ellipse(Math.cos(a)*s*5, Math.sin(a)*s*5, s*5.5, s*3.5, a, 0, Math.PI*2);
+      sctx.fillStyle = f.color; sctx.globalAlpha = .85; sctx.fill(); sctx.globalAlpha=1;
+    }
+    // inner petals
+    for (let i = 0; i < 4; i++) {
+      const a = (i/4)*Math.PI*2 + 0.4;
+      sctx.beginPath();
+      sctx.ellipse(Math.cos(a)*s*2.5, Math.sin(a)*s*2.5, s*3.5, s*2.2, a, 0, Math.PI*2);
+      sctx.fillStyle = f.color; sctx.globalAlpha=.95; sctx.fill(); sctx.globalAlpha=1;
+    }
+    sctx.beginPath(); sctx.arc(0,0,s*2,0,Math.PI*2);
+    sctx.fillStyle='#fce8ef'; sctx.fill();
+  }
+
+  sctx.restore();
+}
+
+// ── Draw meadow ───────────────────────────────────────────
+function drawMeadow(t, time) {
+  if (t <= 0) return;
+  const W = sc.width, H = sc.height;
+  const groundY = H;
+  const meadowT = Math.min(t / 0.35, 1); // meadow fully grown by 35% scene progress
+
+  // Ground strip — soft gradient lawn
+  const grad = sctx.createLinearGradient(0, groundY - 60, 0, groundY);
+  grad.addColorStop(0, `rgba(120,185,100,${meadowT * 0.55})`);
+  grad.addColorStop(0.4, `rgba(90,155,75,${meadowT * 0.75})`);
+  grad.addColorStop(1, `rgba(60,115,50,${meadowT * 0.9})`);
+  sctx.fillStyle = grad;
+  sctx.fillRect(0, groundY - 60, W, 62);
+
+  // Grass blades
+  const showGrass = Math.floor(meadowT * meadowGrass.length);
+  meadowGrass.slice(0, showGrass).forEach(g => {
+    const sway = Math.sin(time * g.speed + g.phase) * 4;
+    sctx.beginPath();
+    sctx.moveTo(g.x, groundY);
+    sctx.quadraticCurveTo(
+      g.x + sway * 0.5, groundY - g.len * 0.5,
+      g.x + sway, groundY - g.len
+    );
+    sctx.strokeStyle = g.col;
+    sctx.lineWidth = 1.3;
+    sctx.lineCap = 'round';
+    sctx.globalAlpha = 0.85;
+    sctx.stroke();
+    sctx.globalAlpha = 1;
+  });
+
+  // Flowers — stagger their growth
+  meadowFlowers.forEach((f, i) => {
+    const flowerStart = 0.12 + (i / meadowFlowers.length) * 0.55;
+    const flowerT = Math.max(0, Math.min((t - flowerStart) / 0.3, 1));
+    if (flowerT <= 0) return;
+    drawMeadowFlower(f, groundY - 4, flowerT, time);
+  });
+}
+
+function drawSakuraFrame(t, time) {
+  sctx.clearRect(0, 0, sc.width, sc.height);
+
+  // ── MEADOW at bottom ──
+  drawMeadow(t, time);
+
+  // ── TREE branches ──
+  const totalBranches = branches.length;
+  const showCount = Math.floor(t * totalBranches);
+
+  for (let i = 0; i < showCount; i++) {
+    const b = branches[i];
+    const toneT = b.gen / 11;
+    const r = Math.round(120 - toneT*40);
+    const g = Math.round(70 - toneT*20);
+    const bv = Math.round(55 - toneT*15);
+    sctx.beginPath();
+    sctx.moveTo(b.x1, b.y1);
+    sctx.lineTo(b.x2, b.y2);
+    sctx.strokeStyle = `rgb(${r},${g},${bv})`;
+    sctx.lineWidth = Math.max(b.w, .5);
+    sctx.lineCap = 'round';
+    sctx.stroke();
+  }
+
+  // ── BLOSSOMS ──
+  if (t > 0.6) {
+    const blossomT = (t - 0.6) / 0.4;
+    const showBlossoms = Math.floor(blossomT * blossoms.length);
+    for (let i = 0; i < showBlossoms; i++) {
+      const bl = blossoms[i];
+      for (let p = 0; p < 5; p++) {
+        const angle = (p/5)*Math.PI*2 - Math.PI/2;
+        const px = bl.x + Math.cos(angle)*bl.r*0.7;
+        const py = bl.y + Math.sin(angle)*bl.r*0.7;
+        sctx.beginPath();
+        sctx.ellipse(px, py, bl.r*.62, bl.r*.4, angle, 0, Math.PI*2);
+        sctx.fillStyle = bl.col; sctx.globalAlpha = .88; sctx.fill(); sctx.globalAlpha = 1;
+      }
+      sctx.beginPath(); sctx.arc(bl.x, bl.y, bl.r*.22, 0, Math.PI*2);
+      sctx.fillStyle = '#fff5e0'; sctx.fill();
+    }
+  }
+
+  // ── FALLING PETALS ──
+  fallingPetals.forEach(p => {
+    sctx.save();
+    sctx.translate(p.x, p.y);
+    sctx.rotate(p.rot * Math.PI/180);
+    sctx.globalAlpha = p.alpha;
+    if (p.type === 'blossom') {
+      for (let i = 0; i < 5; i++) {
+        const a = (i/5)*Math.PI*2;
+        const px = Math.cos(a)*p.size*.6, py = Math.sin(a)*p.size*.6;
+        sctx.beginPath();
+        sctx.ellipse(px, py, p.size*.55, p.size*.33, a, 0, Math.PI*2);
+        sctx.fillStyle = p.color; sctx.fill();
+      }
+      sctx.beginPath(); sctx.arc(0,0,p.size*.18,0,Math.PI*2);
+      sctx.fillStyle='#fff5e0'; sctx.fill();
+    } else {
+      sctx.beginPath();
+      sctx.moveTo(0,-p.size);
+      sctx.bezierCurveTo(p.size*.5,-p.size*.5, p.size*.5,p.size*.5, 0,p.size);
+      sctx.bezierCurveTo(-p.size*.5,p.size*.5,-p.size*.5,-p.size*.5, 0,-p.size);
+      sctx.fillStyle = p.color; sctx.fill();
+    }
+    sctx.restore();
+  });
+}
+
+function createFallingPetal(fromBlossom) {
+  const W = sc.width, H = sc.height;
+  let sx, sy;
+  if (fromBlossom && blossoms.length > 0) {
+    // spawn right at a blossom position (blossoms are near tops of trees)
+    const b = blossoms[Math.floor(Math.random()*blossoms.length)];
+    sx = b.x + (Math.random()-.5)*40;
+    sy = b.y + (Math.random()-.5)*20;
+  } else {
+    // spawn randomly across the top portion of the screen
+    sx = Math.random() * W;
+    sy = -10 + Math.random() * H * 0.3;
+  }
+  return {
+    x: sx, y: sy,
+    size: 5 + Math.random()*9,
+    speedY: 0.6 + Math.random()*1.2,   // always positive → falls DOWN
+    speedX: (Math.random()-.5)*0.8,
+    rot: Math.random()*360, rotSpeed: (Math.random()-.5)*2,
+    alpha: 0.55 + Math.random()*0.4,
+    color: PETAL_COLORS[Math.floor(Math.random()*PETAL_COLORS.length)],
+    swing: Math.random()*Math.PI*2,
+    swingSpeed: 0.018 + Math.random()*0.018,
+    type: Math.random() > .45 ? 'blossom' : 'petal'
+  };
+}
+
+function updateFallingPetals() {
+  fallingPetals.forEach(p => {
+    p.swing += p.swingSpeed;
+    p.y += p.speedY;                          // move DOWN
+    p.x += p.speedX + Math.sin(p.swing)*0.7;  // gentle side sway
+    p.rot += p.rotSpeed;
+    if (p.y > sc.height + 30) {               // recycle at bottom
+      // respawn at top
+      const fresh = createFallingPetal(Math.random() > .4);
+      fresh.y = -10 - Math.random()*60;        // ensure it starts above viewport
+      Object.assign(p, fresh);
+    }
+  });
+}
+
+// ── Sakura animation loop ──────────────────────────────
+let sakuraRAF = null;
+let growStart = null;
+const GROW_DURATION = 2800; // ms tree grows
+
+function sakuraLoop(ts) {
+  if (!sakuraActive) return;
+  if (!growStart) growStart = ts;
+  const elapsed = ts - growStart;
+  treeProgress = Math.min(elapsed / GROW_DURATION, 1);
+
+  // once tree is mostly grown, spawn petals from top
+  if (treeProgress > 0.55 && fallingPetals.length < 90) {
+    const burst = treeProgress > 0.9 ? 5 : 2;
+    for (let i = 0; i < burst; i++) {
+      const p = createFallingPetal(true);
+      p.y = Math.random() * sc.height * 0.5; // spread initial petals across top half
+      fallingPetals.push(p);
+    }
+  }
+
+  updateFallingPetals();
+  drawSakuraFrame(treeProgress, ts * 0.001);
+  sakuraRAF = requestAnimationFrame(sakuraLoop);
+}
+
+function startSakura() {
+  sakuraActive = true;
+  growStart = null;
+  treeProgress = 0;
+  fallingPetals.length = 0;
+  initTree();
+  initMeadow();
+  sakuraRAF = requestAnimationFrame(sakuraLoop);
+}
+
+function stopSakura() {
+  sakuraActive = false;
+  if (sakuraRAF) cancelAnimationFrame(sakuraRAF);
+  sctx.clearRect(0, 0, sc.width, sc.height);
+}
+
+// ─── SCENE SEQUENCER ────────────────────────────────────
+const scenes = ['scene1','scene2','scene3','scene4','scene5'];
+let current = 0;
+let autoTimer = null;
+
+const poemLines = [
+  {id:'pl1', t:400}, {id:'pl2', t:1000}, {id:'pl3', t:1700}, {id:'pl4', t:2400},
+  {id:'pl5', t:3400}, {id:'pl6', t:4100}, {id:'pl7', t:4800}, {id:'pl8', t:5500},
+  {id:'pl9', t:6600}, {id:'pl10',t:7300},
+];
+let poemTimers = [];
+
+function resetPoemLines() {
+  poemTimers.forEach(clearTimeout); poemTimers = [];
+  poemLines.forEach(({ id }) => {
+    const el = document.getElementById(id);
+    if (el) { el.style.transition='none'; el.style.opacity='0'; el.style.transform='translateY(14px)'; }
+  });
+}
+
+function animatePoemLines() {
+  poemLines.forEach(({ id, t }) => {
+    poemTimers.push(setTimeout(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.transition = 'opacity 1s ease, transform 1s ease';
+      el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+    }, t));
+  });
+}
+
+const sceneDurations = [5000, 8000, 11000, 9000, 0];
+
+const btnPrev = document.getElementById('btnPrev');
+const btnNext = document.getElementById('btnNext');
+const dots    = document.querySelectorAll('.dot');
+
+function updateNav() {
+  btnPrev.disabled = current === 0;
+  btnNext.disabled = current === scenes.length - 1;
+  dots.forEach((d, i) => d.classList.toggle('on', i === current));
+}
+
+function goTo(idx, fromUser) {
+  if (idx < 0 || idx >= scenes.length) return;
+
+  // stop auto-advance if user tapped
+  if (fromUser && autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+
+  const prev = scenes[current];
+  document.getElementById(prev).classList.remove('active');
+  if (prev === 'scene2') stopSakura();
+  if (current === 2) resetPoemLines();
+
+  current = idx;
+  document.getElementById(scenes[current]).classList.add('active');
+  updateNav();
+
+  if (scenes[current] === 'scene2') startSakura();
+  if (current === 2) animatePoemLines();
+
+  // auto-advance only if NOT triggered by user
+  if (!fromUser && sceneDurations[current]) {
+    autoTimer = setTimeout(() => goTo(current + 1, false), sceneDurations[current]);
+  }
+}
+
+// start auto-play
+autoTimer = setTimeout(() => goTo(1, false), sceneDurations[0]);
+
+// ── button clicks ──
+btnPrev.addEventListener('click', () => goTo(current - 1, true));
+btnNext.addEventListener('click', () => goTo(current + 1, true));
+dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.i, true)));
+
+// ── restart ──
+document.getElementById('restartBtn').addEventListener('click', () => {
+  resetPoemLines();
+  stopSakura();
+  goTo(0, true);
+  autoTimer = setTimeout(() => goTo(1, false), sceneDurations[0]);
+});
+
+// ── keyboard ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1, true);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1, true);
+});
+
+// ── touch swipe ──
+let touchStartX = 0, touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) {
+    goTo(dx < 0 ? current + 1 : current - 1, true);
+  }
+}, { passive: true });
+
+updateNav();
+
+// ─── MUSIC ───────────────────────────────────────────────
+const bgMusic  = document.getElementById('bgMusic');
+const musicBtn = document.getElementById('musicBtn');
+let musicOn = false;
+
+bgMusic.volume = 0.55;
+
+function tryPlay() {
+  bgMusic.play().then(() => {
+    musicOn = true;
+    musicBtn.classList.add('playing');
+    musicBtn.classList.remove('muted');
+    musicBtn.querySelector('.note').textContent = '🎵';
+  }).catch(() => {
+    musicOn = false;
+    musicBtn.classList.remove('playing');
+    musicBtn.classList.add('muted');
+    musicBtn.querySelector('.note').textContent = '🔇';
+  });
+}
+
+tryPlay();
+
+function onFirstInteraction() {
+  if (!musicOn) tryPlay();
+}
+document.addEventListener('touchstart', onFirstInteraction, { once: true });
+document.addEventListener('click',      onFirstInteraction, { once: true });
+
+musicBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  if (musicOn) {
+    bgMusic.pause();
+    musicOn = false;
+    musicBtn.classList.remove('playing');
+    musicBtn.classList.add('muted');
+    musicBtn.querySelector('.note').textContent = '🔇';
+  } else {
+    bgMusic.play();
+    musicOn = true;
+    musicBtn.classList.add('playing');
+    musicBtn.classList.remove('muted');
+    musicBtn.querySelector('.note').textContent = '🎵';
+  }
+});
+
+// ─── SPARKLES ────────────────────────────────────────────
+const sparkleChars = ['✦','✧','✿','❀','❁','✾','⋆','·'];
+function spawnSparkle() {
+  const s = document.createElement('div');
+  s.className = 'sparkle';
+  s.textContent = sparkleChars[Math.floor(Math.random()*sparkleChars.length)];
+  s.style.left = Math.random()*100+'vw'; s.style.bottom='-10px';
+  s.style.color=['#e8a0b4','#d4b8d8','#c9a96e','#b5c9b7'][Math.floor(Math.random()*4)];
+  const dur=12+Math.random()*12;
+  s.style.animationDuration=dur+'s'; s.style.animationDelay=Math.random()*4+'s';
+  s.style.fontSize=(.6+Math.random()*.8)+'rem';
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(),(dur+5)*1000);
+}
+setInterval(spawnSparkle,1200);
+for(let i=0;i<10;i++) setTimeout(spawnSparkle,i*300);
+</script>
+</body>
+</html>
