@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Апама Туулган Күн Куттуктоо</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Cinzel:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ─────────────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+  width:100%; height:100%;
+  overflow:hidden;
+  background:#0d0814;
+  font-family:'Cormorant Garamond', serif;
+  color:#f5eef8;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ─── CSS VARS ──────────────────────────────────────────── */
+:root {
+  --pink:        #e8829a;
+  --pink-bright: #f0a0b8;
+  --pink-deep:   #c05070;
+  --pink-glow:   rgba(232,130,154,0.35);
+  --gold:        #d4a864;
+  --gold-light:  #f0cc90;
+  --purple:      #8b5cf6;
+  --cream:       #fdf0f5;
+  --text-hi:     #fff5f8;
+  --text-mid:    #d4a8bc;
+  --text-soft:   #9a7080;
+  --glass-bg:    rgba(255,240,248,0.06);
+  --glass-border:rgba(232,130,154,0.2);
+}
+
+/* ─── ANIMATED GRADIENT BG ──────────────────────────────── */
+.bg {
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 10%, #2a0a1f 0%, transparent 60%),
+    radial-gradient(ellipse 70% 70% at 85% 90%, #1a0530 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 50% 50%, #120220 0%, #0d0814 100%);
+  animation: bgBreath 14s ease-in-out infinite alternate;
+}
+@keyframes bgBreath {
+  0%   { filter:brightness(1) saturate(1); }
+  100% { filter:brightness(1.15) saturate(1.2); }
+}
+
+/* ─── NOISE TEXTURE ─────────────────────────────────────── */
+.noise {
+  position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ─── CANVAS LAYERS ─────────────────────────────────────── */
+#petalCanvas  { position:fixed; inset:0; z-index:2; pointer-events:none; }
+#sakuraCanvas { position:absolute; inset:0; pointer-events:none; z-index:1; }
+
+/* ─── SCENES ────────────────────────────────────────────── */
+.scene {
+  position:fixed; inset:0; z-index:10;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity 1.6s cubic-bezier(.4,0,.2,1);
+}
+.scene.active { opacity:1; pointer-events:all; }
+
+/* ─── SCENE 1 — CINEMATIC OPENER ───────────────────────── */
+#scene1 { gap:0; }
+
+.s1-tag {
+  font-family:'Cinzel', serif;
+  font-size:clamp(.65rem,1.8vw,.85rem);
+  letter-spacing:.45em;
+  text-transform:uppercase;
+  color:var(--pink);
+  opacity:0;
+  animation:riseIn 1.2s ease .3s forwards;
+}
+.s1-date-line {
+  display:flex; align-items:center; gap:1.2rem;
+  margin:.9rem 0 1.4rem;
+  opacity:0;
+  animation:riseIn 1.2s ease 1s forwards;
+}
+.s1-rule { flex:1; max-width:70px; height:1px; background:linear-gradient(90deg,transparent,var(--pink-deep)); }
+.s1-rule.r { background:linear-gradient(90deg,var(--pink-deep),transparent); }
+.s1-date {
+  font-family:'Cinzel', serif;
+  font-size:clamp(.8rem,2vw,1rem);
+  letter-spacing:.25em;
+  color:var(--text-mid);
+}
+
+.s1-name {
+  font-family:'Cormorant Garamond', serif;
+  font-size:clamp(5rem,18vw,13rem);
+  font-weight:600;
+  font-style:italic;
+  line-height:.9;
+  background:linear-gradient(135deg, #fff5f8 0%, var(--pink-bright) 40%, var(--gold-light) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  opacity:0;
+  animation:riseIn 1.6s cubic-bezier(.2,.8,.4,1) 1.6s forwards;
+  filter:drop-shadow(0 0 60px var(--pink-glow));
+  text-align:center;
+}
+
+.s1-sub {
+  font-style:italic;
+  font-size:clamp(1rem,2.5vw,1.35rem);
+  color:var(--text-mid);
+  letter-spacing:.1em;
+  margin-top:1.2rem;
+  opacity:0;
+  animation:riseIn 1.2s ease 2.4s forwards;
+}
+
+.s1-scroll-hint {
+  position:absolute; bottom:5.5rem;
+  display:flex; flex-direction:column; align-items:center; gap:.4rem;
+  opacity:0; animation:riseIn 1s ease 3.5s forwards;
+}
+.s1-scroll-hint span { font-size:.65rem; letter-spacing:.3em; text-transform:uppercase; color:var(--text-soft); }
+.s1-chevron {
+  width:18px; height:18px; border-right:1px solid var(--pink); border-bottom:1px solid var(--pink);
+  transform:rotate(45deg); animation:bounce .9s ease-in-out infinite alternate;
+}
+@keyframes bounce { from{transform:rotate(45deg) translateY(-3px);} to{transform:rotate(45deg) translateY(3px);} }
+
+/* ─── SCENE 2 — SAKURA ──────────────────────────────────── */
+#scene2 { overflow:hidden; }
+
+/* ─── SCENE 3 — POEM ────────────────────────────────────── */
+#scene3 { padding:0 1.5rem 5rem; }
+
+.poem-card {
+  position:relative;
+  width:min(660px,95vw);
+  padding:clamp(1.8rem,5vw,3rem) clamp(1.5rem,4vw,2.8rem);
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  border-radius:4px;
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  box-shadow:
+    0 0 0 1px rgba(232,130,154,.05),
+    0 20px 80px rgba(0,0,0,.5),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  overflow:hidden;
+}
+/* top glow strip */
+.poem-card::before {
+  content:'';
+  position:absolute; top:0; left:10%; right:10%; height:1px;
+  background:linear-gradient(90deg,transparent,var(--pink),transparent);
+}
+/* bottom glow strip */
+.poem-card::after {
+  content:'';
+  position:absolute; bottom:0; left:10%; right:10%; height:1px;
+  background:linear-gradient(90deg,transparent,var(--pink-deep),transparent);
+}
+/* ambient glow behind card */
+.poem-card-glow {
+  position:absolute; inset:-60px; z-index:-1;
+  background:radial-gradient(ellipse at 50% 50%, rgba(200,80,120,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+
+.poem-title {
+  font-family:'Cinzel', serif;
+  font-size:clamp(.7rem,1.8vw,.88rem);
+  letter-spacing:.4em;
+  text-transform:uppercase;
+  color:var(--pink);
+  text-align:center;
+  margin-bottom:clamp(1.2rem,3vw,2rem);
+  opacity:0;
+  animation:riseIn 1s ease .2s forwards;
+}
+
+.poem-line {
+  font-family:'Cormorant Garamond', serif;
+  font-size:clamp(1.05rem,2.6vw,1.4rem);
+  font-style:italic;
+  font-weight:300;
+  line-height:2;
+  color:var(--text-hi);
+  text-align:center;
+  opacity:0;
+  transform:translateY(18px);
+  letter-spacing:.02em;
+}
+
+.poem-sep {
+  display:flex; align-items:center; gap:.8rem;
+  margin:clamp(.8rem,2vw,1.4rem) auto; width:fit-content;
+  opacity:0; animation:fadeIn .8s ease forwards;
+}
+.poem-sep-line { width:32px; height:1px; background:var(--pink-deep); opacity:.5; }
+.poem-sep-diamond { width:5px; height:5px; background:var(--pink); transform:rotate(45deg); box-shadow:0 0 6px var(--pink); }
+
+/* ─── SCENE 4 — WISH ────────────────────────────────────── */
+#scene4 { padding:0 1.5rem 5rem; }
+
+.wish-wrap { text-align:center; max-width:680px; }
+
+.wish-label {
+  font-family:'Cinzel', serif;
+  font-size:clamp(.6rem,1.5vw,.78rem);
+  letter-spacing:.5em;
+  text-transform:uppercase;
+  color:var(--pink);
+  opacity:0; animation:riseIn 1s ease .1s forwards;
+  margin-bottom:1rem;
+}
+.wish-heading {
+  font-family:'Cormorant Garamond', serif;
+  font-size:clamp(3rem,10vw,7rem);
+  font-weight:600;
+  font-style:italic;
+  line-height:1;
+  background:linear-gradient(135deg,var(--text-hi) 0%,var(--pink-bright) 50%,var(--gold-light) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  opacity:0; animation:riseIn 1.6s cubic-bezier(.2,.8,.4,1) .4s forwards;
+  filter:drop-shadow(0 0 40px var(--pink-glow));
+}
+.wish-divider {
+  width:60px; height:1px;
+  background:linear-gradient(90deg,transparent,var(--pink),transparent);
+  margin:1.8rem auto;
+  opacity:0; animation:fadeIn 1s ease 1.4s forwards;
+}
+.wish-text {
+  font-size:clamp(1.05rem,2.6vw,1.45rem);
+  font-style:italic;
+  font-weight:300;
+  line-height:1.95;
+  color:var(--text-mid);
+  opacity:0; animation:riseIn 1.2s ease 1.6s forwards;
+  letter-spacing:.02em;
+}
+.wish-sig {
+  margin-top:2rem;
+  font-family:'Cinzel', serif;
+  font-size:clamp(.7rem,1.8vw,.9rem);
+  letter-spacing:.3em;
+  color:var(--gold);
+  opacity:0; animation:riseIn 1s ease 2.6s forwards;
+}
+
+/* ─── SCENE 5 — FINALE ──────────────────────────────────── */
+#scene5 {}
+
+.finale-wrap { text-align:center; }
+.finale-pre {
+  font-family:'Cinzel', serif;
+  font-size:clamp(.6rem,1.5vw,.78rem);
+  letter-spacing:.6em;
+  text-transform:uppercase;
+  color:var(--text-soft);
+  opacity:0; animation:riseIn 1s ease .2s forwards;
+  margin-bottom:1.2rem;
+}
+.finale-main {
+  font-family:'Cormorant Garamond', serif;
+  font-size:clamp(2.6rem,9vw,6.5rem);
+  font-weight:600;
+  font-style:italic;
+  line-height:1.1;
+  background:linear-gradient(135deg,#fff5f8 0%,var(--pink-bright) 40%,var(--gold-light) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  opacity:0; animation:riseIn 1.8s cubic-bezier(.2,.8,.4,1) .6s forwards;
+  filter:drop-shadow(0 0 80px var(--pink-glow));
+}
+.finale-hearts {
+  font-size:clamp(1.6rem,5vw,2.4rem);
+  margin-top:1.4rem;
+  letter-spacing:.5em;
+  opacity:0; animation:riseIn 1s ease 1.8s forwards;
+  filter:drop-shadow(0 0 12px var(--pink-glow));
+}
+.restart-btn {
+  margin-top:2.8rem;
+  padding:.8rem 2.4rem;
+  background:transparent;
+  border:1px solid var(--pink);
+  border-radius:2px;
+  font-family:'Cinzel', serif;
+  font-size:.75rem;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  color:var(--pink);
+  cursor:pointer;
+  opacity:0; animation:riseIn 1s ease 2.8s forwards;
+  transition:all .3s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.restart-btn:hover { background:var(--pink); color:#0d0814; box-shadow:0 0 30px var(--pink-glow); }
+.restart-btn:active { transform:scale(.95); }
+
+/* ─── NAV BAR ───────────────────────────────────────────── */
+#navBar {
+  position:fixed; bottom:0; left:0; right:0; z-index:200;
+  display:flex; align-items:center; justify-content:center; gap:1.2rem;
+  padding:.9rem 1.5rem 1.8rem;
+  background:linear-gradient(to top, rgba(13,8,20,.85) 0%, transparent 100%);
+  pointer-events:none;
+}
+.nav-btn {
+  pointer-events:all;
+  width:44px; height:44px; border-radius:50%;
+  border:1px solid rgba(232,130,154,.35);
+  background:rgba(255,240,248,.05);
+  backdrop-filter:blur(10px);
+  color:var(--pink);
+  font-size:1.1rem;
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .25s ease;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation; user-select:none;
+}
+.nav-btn:hover  { background:var(--pink); color:#0d0814; border-color:var(--pink); box-shadow:0 0 20px var(--pink-glow); }
+.nav-btn:active { transform:scale(.88); }
+.nav-btn:disabled { opacity:.18; pointer-events:none; }
+
+#dotRow { display:flex; gap:.6rem; align-items:center; }
+.dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--pink); opacity:.2;
+  transition:all .4s ease; cursor:pointer; pointer-events:all;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+.dot.on { opacity:1; transform:scale(1.8); box-shadow:0 0 8px var(--pink); }
+
+/* ─── MUSIC BUTTON ──────────────────────────────────────── */
+#musicBtn {
+  position:fixed; top:1.2rem; right:1.2rem; z-index:300;
+  width:44px; height:44px; border-radius:50%;
+  border:1px solid rgba(232,130,154,.35);
+  background:rgba(255,240,248,.06);
+  backdrop-filter:blur(10px);
+  color:var(--pink); font-size:1.15rem;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .25s ease;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  box-shadow:0 0 20px rgba(200,80,120,.1);
+  animation:riseIn 1s ease 3.5s both;
+}
+#musicBtn:hover { background:var(--pink); color:#0d0814; border-color:var(--pink); }
+#musicBtn:active { transform:scale(.88); }
+#musicBtn.muted { opacity:.35; }
+@keyframes noteSpin { to { transform:rotate(360deg); } }
+#musicBtn.playing .note { display:inline-block; animation:noteSpin 4s linear infinite; }
+
+/* ─── SLIDE COUNTER ─────────────────────────────────────── */
+#slideCounter {
+  position:fixed; top:1.3rem; left:1.4rem; z-index:200;
+  font-family:'Cinzel', serif;
+  font-size:.65rem; letter-spacing:.3em;
+  color:var(--text-soft);
+  opacity:0; animation:riseIn 1s ease 3.5s both;
+}
+
+/* ─── FLOATING PARTICLES ────────────────────────────────── */
+.particle {
+  position:fixed; pointer-events:none; z-index:3; opacity:0;
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp {
+  0%   { opacity:0; transform:translateY(0) rotate(0deg); }
+  8%   { opacity:.7; }
+  90%  { opacity:.4; }
+  100% { opacity:0; transform:translateY(-110vh) rotate(360deg); }
+}
+
+/* ─── KEYFRAMES ─────────────────────────────────────────── */
+@keyframes riseIn {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to   { opacity:.8; }
+}
+@keyframes scaleIn {
+  from { opacity:0; transform:scale(.9); }
+  to   { opacity:1; transform:scale(1); }
+}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="noise"></div>
+<canvas id="petalCanvas"></canvas>
+
+<!-- music -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+<button id="musicBtn" class="playing" aria-label="Музыка"><span class="note">🎵</span></button>
+
+<!-- slide counter -->
+<div id="slideCounter">01 / 05</div>
+
+<!-- nav -->
+<div id="navBar">
+  <button class="nav-btn" id="btnPrev" disabled>&#8592;</button>
+  <div id="dotRow">
+    <div class="dot on" data-i="0"></div>
+    <div class="dot"    data-i="1"></div>
+    <div class="dot"    data-i="2"></div>
+    <div class="dot"    data-i="3"></div>
+    <div class="dot"    data-i="4"></div>
+  </div>
+  <button class="nav-btn" id="btnNext">&#8594;</button>
+</div>
+
+<!-- ══ SCENE 1 ══ -->
+<div class="scene active" id="scene1">
+  <p class="s1-tag">Туулган Күнгө Куттуктоо</p>
+  <div class="s1-date-line">
+    <div class="s1-rule"></div>
+    <span class="s1-date">8 — Май — 2026</span>
+    <div class="s1-rule r"></div>
+  </div>
+  <h1 class="s1-name">Апаке</h1>
+  
+  <div class="s1-scroll-hint">
+    <span>алга</span>
+    <div class="s1-chevron"></div>
+  </div>
+</div>
+
+<!-- ══ SCENE 2 — SAKURA ══ -->
+<div class="scene" id="scene2">
+  <canvas id="sakuraCanvas"></canvas>
+</div>
+
+<!-- ══ SCENE 3 — POEM ══ -->
+<div class="scene" id="scene3">
+  <div class="poem-card">
+    <div class="poem-card-glow"></div>
+    <p class="poem-title">Апама</p>
+
+    <p class="poem-line" id="pl1">Дүйнөдөгү эң кымбаттуу асылым,</p>
+    <p class="poem-line" id="pl2">Мээримиңиз — менин бактым, асылым.</p>
+    <p class="poem-line" id="pl3">Күн нурундай жылуу тийип мээримиң,</p>
+    <p class="poem-line" id="pl4">Жарык кылат турмушумдун ар кырын.</p>
+
+    <div class="poem-sep" style="animation-delay:2.6s">
+      <div class="poem-sep-line"></div>
+      <div class="poem-sep-diamond"></div>
+      <div class="poem-sep-line"></div>
+    </div>
+
+    <p class="poem-line" id="pl5">Түн уйкуңду мага арнап бөлдүңүз,</p>
+    <p class="poem-line" id="pl6">Түйшүк тартып, биз деп гана күлдүңүз.</p>
+    <p class="poem-line" id="pl7">Талпынттыңыз, жетеледиңиз турмушта,</p>
+    <p class="poem-line" id="pl8">Бала үчүн баарын берип келдиңиз.</p>
+
+    <div class="poem-sep" style="animation-delay:5s">
+      <div class="poem-sep-line"></div>
+      <div class="poem-sep-diamond"></div>
+      <div class="poem-sep-line"></div>
+    </div>
+
+    <p class="poem-line" id="pl9">Туулган күнүң куттуу болсун, Апаке,</p>
+  </div>
+</div>
+
+<!-- ══ SCENE 4 — WISH ══ -->
+<div class="scene" id="scene4">
+  <div class="wish-wrap">
+    
+    <h2 class="wish-heading">Куттуктайм,<br>Апаке!</h2>
+    <div class="wish-divider"></div>
+    <p class="wish-text">
+      Апакебай, аман болуп жүрүңүз,<br>
+      Ар дайым эле жайнап турсун жүзүңүз.<br><br>
+      Сиз бар үчүн бул жашоодо бактылуумун,<br>
+      Көп жашаңыз, гүлдөп турсун өмүрүңүз!
+    </p>
+    <p class="wish-sig">🌸 &nbsp; Сизди чексиз сүйгөн балдарыңыз &nbsp; 🌸</p>
+  </div>
+</div>
+
+<!-- ══ SCENE 5 — FINALE ══ -->
+<div class="scene" id="scene5">
+  <div class="finale-wrap">
+    <p class="finale-pre">Ар дайым жана түбөлүк</p>
+    <p class="finale-main">Сизди Чексиз<br>Жакшы Көрөбүз</p>
+    <p class="finale-hearts">🌸 &nbsp; 💕 &nbsp; 🌸</p>
+    <button class="restart-btn" id="restartBtn">Кайра көрүү</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  BACKGROUND PETAL CANVAS
+// ═══════════════════════════════════════════════
+const canvas = document.getElementById('petalCanvas');
+const ctx    = canvas.getContext('2d');
+function resizeBg() { canvas.width=innerWidth; canvas.height=innerHeight; }
+resizeBg(); window.addEventListener('resize', resizeBg);
+
+const PC = ['#e8829a','#f0b8cc','#fce0ec','#d4a864','#f0cc90','#c8a0d8'];
+const bgPetals = [];
+function mkBgPetal() {
+  return {
+    x: Math.random()*canvas.width, y:-20,
+    sz: 4+Math.random()*8,
+    vy: .35+Math.random()*.7, vx:(Math.random()-.5)*.5,
+    rot: Math.random()*360, rs:(Math.random()-.5)*1.2,
+    a: .12+Math.random()*.22,
+    col: PC[Math.floor(Math.random()*PC.length)],
+    sw: Math.random()*Math.PI*2, ss:.015+Math.random()*.01
+  };
+}
+for(let i=0;i<30;i++){const p=mkBgPetal();p.y=Math.random()*canvas.height;bgPetals.push(p);}
+
+function drawBgPetal(p) {
+  ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.globalAlpha=p.a;
+  ctx.beginPath();
+  ctx.moveTo(0,-p.sz);
+  ctx.bezierCurveTo(p.sz*.5,-p.sz*.5,p.sz*.5,p.sz*.5,0,p.sz);
+  ctx.bezierCurveTo(-p.sz*.5,p.sz*.5,-p.sz*.5,-p.sz*.5,0,-p.sz);
+  ctx.fillStyle=p.col; ctx.fill(); ctx.restore();
+}
+(function animBg(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  bgPetals.forEach(p=>{
+    p.sw+=p.ss; p.y+=p.vy; p.x+=p.vx+Math.sin(p.sw)*.4; p.rot+=p.rs;
+    if(p.y>canvas.height+30) Object.assign(p,mkBgPetal());
+    drawBgPetal(p);
+  });
+  requestAnimationFrame(animBg);
+})();
+
+// ═══════════════════════════════════════════════
+//  SAKURA CANVAS
+// ═══════════════════════════════════════════════
+const sc   = document.getElementById('sakuraCanvas');
+const sctx = sc.getContext('2d');
+function resizeSc() { sc.width=innerWidth; sc.height=innerHeight; }
+resizeSc(); window.addEventListener('resize', resizeSc);
+
+const PCOL = ['#f9c8d8','#f4b0c8','#fce4ee','#f0a0c0','#fdd0e4','#f7e0ec','#e8829a'];
+let treeProgress=0, sakuraActive=false;
+const branches=[], blossoms=[], fallingPetals=[];
+
+function buildTree(x1,y1,angle,length,width,gen) {
+  if(gen>11||length<3) return;
+  const rad=angle*Math.PI/180;
+  const x2=x1+Math.cos(rad)*length, y2=y1+Math.sin(rad)*length;
+  branches.push({x1,y1,x2,y2,w:width,gen});
+  if(gen>7){
+    for(let i=0;i<3;i++) blossoms.push({x:x2+(Math.random()-.5)*10,y:y2+(Math.random()-.5)*10,r:4+Math.random()*5,col:PCOL[Math.floor(Math.random()*PCOL.length)]});
+    return;
+  }
+  const spread=22+gen*2, lr=.68+Math.random()*.06;
+  buildTree(x2,y2,angle-spread+(Math.random()-.5)*8,length*lr,width*.68,gen+1);
+  buildTree(x2,y2,angle+spread+(Math.random()-.5)*8,length*lr,width*.68,gen+1);
+  if(gen<5) buildTree(x2,y2,angle+(Math.random()-.5)*12,length*lr*.9,width*.55,gen+2);
+}
+function initTree(){
+  branches.length=0; blossoms.length=0;
+  const W=sc.width,H=sc.height;
+  buildTree(W*.2,H,-88,H*.32,14,0);
+  buildTree(W*.8,H,-92,H*.32,14,0);
+}
+
+// meadow
+const meadowGrass=[], meadowFlowers=[];
+function initMeadow(){
+  const W=sc.width,H=sc.height;
+  meadowGrass.length=0; meadowFlowers.length=0;
+  for(let i=0;i<300;i++) meadowGrass.push({
+    x:Math.random()*W, len:16+Math.random()*40,
+    col:['#4a9050','#5ab060','#3d7a44','#6ac070','#80c878'][Math.floor(Math.random()*5)],
+    phase:Math.random()*Math.PI*2, speed:.01+Math.random()*.008
+  });
+  const types=['daisy','tulip','dandelion','rose'];
+  const cols={daisy:['#fff8f0','#ffe8e8','#fff0f5'],tulip:['#f4a0b8','#e8607d','#f9a870','#f9c8a0'],dandelion:['#fce97a','#f5d850','#ffed90'],rose:['#e8829a','#c85070','#f4b8cc']};
+  for(let i=0;i<48;i++){
+    const t=types[Math.floor(Math.random()*types.length)];
+    const c=cols[t];
+    meadowFlowers.push({x:20+Math.random()*(W-40),type:t,color:c[Math.floor(Math.random()*c.length)],stemH:28+Math.random()*40,phase:Math.random()*Math.PI*2,speed:.007+Math.random()*.005,size:.65+Math.random()*.7});
+  }
+}
+
+function drawMeadowFlower(f,groundY,growT,time){
+  const sway=Math.sin(time*f.speed+f.phase)*3;
+  const stemTop=groundY-f.stemH*growT;
+  const tipX=f.x+sway;
+  sctx.beginPath(); sctx.moveTo(f.x,groundY);
+  sctx.quadraticCurveTo(f.x+sway*.5,groundY-f.stemH*growT*.5,tipX,stemTop);
+  sctx.strokeStyle='#4a9050'; sctx.lineWidth=1.5; sctx.lineCap='round'; sctx.stroke();
+  if(growT<.5) return;
+  const s=f.size*((growT-.5)/.5);
+  sctx.save(); sctx.translate(tipX,stemTop);
+  if(f.type==='daisy'){
+    for(let i=0;i<10;i++){const a=(i/10)*Math.PI*2;sctx.beginPath();sctx.ellipse(Math.cos(a)*s*7,Math.sin(a)*s*7,s*3.5,s*2,a,0,Math.PI*2);sctx.fillStyle=f.color;sctx.globalAlpha=.9;sctx.fill();sctx.globalAlpha=1;}
+    sctx.beginPath();sctx.arc(0,0,s*4,0,Math.PI*2);sctx.fillStyle='#f5d050';sctx.fill();
+    sctx.beginPath();sctx.arc(0,0,s*2,0,Math.PI*2);sctx.fillStyle='#e8b830';sctx.fill();
+  } else if(f.type==='tulip'){
+    sctx.beginPath();sctx.moveTo(-s*7,s*2);sctx.bezierCurveTo(-s*9,-s*4,-s*6,-s*14,0,-s*16);sctx.bezierCurveTo(s*6,-s*14,s*9,-s*4,s*7,s*2);sctx.bezierCurveTo(s*4,s*6,-s*4,s*6,-s*7,s*2);
+    sctx.fillStyle=f.color;sctx.globalAlpha=.92;sctx.fill();sctx.globalAlpha=1;
+    sctx.beginPath();sctx.moveTo(-s*2,0);sctx.bezierCurveTo(-s*2,-s*8,s,-s*13,s,-s*14);sctx.strokeStyle='rgba(255,255,255,.3)';sctx.lineWidth=s*2;sctx.stroke();
+  } else if(f.type==='dandelion'){
+    for(let i=0;i<22;i++){const a=(i/22)*Math.PI*2;sctx.beginPath();sctx.moveTo(0,0);sctx.lineTo(Math.cos(a)*s*12,Math.sin(a)*s*12);sctx.strokeStyle=f.color;sctx.lineWidth=s*1.1;sctx.globalAlpha=.75;sctx.stroke();sctx.globalAlpha=1;sctx.beginPath();sctx.arc(Math.cos(a)*s*12,Math.sin(a)*s*12,s*1.8,0,Math.PI*2);sctx.fillStyle='#fffde0';sctx.fill();}
+    sctx.beginPath();sctx.arc(0,0,s*3,0,Math.PI*2);sctx.fillStyle='#f0d040';sctx.fill();
+  } else {
+    for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;sctx.beginPath();sctx.ellipse(Math.cos(a)*s*5,Math.sin(a)*s*5,s*5.5,s*3.5,a,0,Math.PI*2);sctx.fillStyle=f.color;sctx.globalAlpha=.85;sctx.fill();sctx.globalAlpha=1;}
+    for(let i=0;i<4;i++){const a=(i/4)*Math.PI*2+.4;sctx.beginPath();sctx.ellipse(Math.cos(a)*s*2.5,Math.sin(a)*s*2.5,s*3.5,s*2.2,a,0,Math.PI*2);sctx.fillStyle=f.color;sctx.globalAlpha=.92;sctx.fill();sctx.globalAlpha=1;}
+    sctx.beginPath();sctx.arc(0,0,s*2,0,Math.PI*2);sctx.fillStyle='#ffe0ec';sctx.fill();
+  }
+  sctx.restore();
+}
+
+function drawMeadow(t,time){
+  if(t<=0) return;
+  const W=sc.width,H=sc.height,gY=H;
+  const mT=Math.min(t/.35,1);
+  // ground gradient — richer dark green for dark theme
+  const gr=sctx.createLinearGradient(0,gY-70,0,gY);
+  gr.addColorStop(0,`rgba(50,110,50,${mT*.45})`);
+  gr.addColorStop(.5,`rgba(35,85,35,${mT*.7})`);
+  gr.addColorStop(1,`rgba(20,60,20,${mT*.9})`);
+  sctx.fillStyle=gr; sctx.fillRect(0,gY-70,W,72);
+
+  const sg=Math.floor(mT*meadowGrass.length);
+  meadowGrass.slice(0,sg).forEach(g=>{
+    const sw=Math.sin(time*g.speed+g.phase)*5;
+    sctx.beginPath(); sctx.moveTo(g.x,gY);
+    sctx.quadraticCurveTo(g.x+sw*.5,gY-g.len*.5,g.x+sw,gY-g.len);
+    sctx.strokeStyle=g.col; sctx.lineWidth=1.2; sctx.lineCap='round'; sctx.globalAlpha=.8; sctx.stroke(); sctx.globalAlpha=1;
+  });
+  meadowFlowers.forEach((f,i)=>{
+    const fs=.1+(i/meadowFlowers.length)*.6;
+    const fT=Math.max(0,Math.min((t-fs)/.28,1));
+    if(fT>0) drawMeadowFlower(f,gY-3,fT,time);
+  });
+}
+
+function mkFallingPetal(){
+  const W=sc.width,H=sc.height;
+  let sx,sy;
+  if(blossoms.length>0&&Math.random()>.3){
+    const b=blossoms[Math.floor(Math.random()*blossoms.length)];
+    sx=b.x+(Math.random()-.5)*40; sy=b.y+(Math.random()-.5)*20;
+  } else { sx=Math.random()*W; sy=-10+Math.random()*H*.25; }
+  return {
+    x:sx,y:sy,
+    sz:5+Math.random()*9,
+    vy:.6+Math.random()*1.2, vx:(Math.random()-.5)*.9,
+    rot:Math.random()*360, rs:(Math.random()-.5)*2,
+    a:.55+Math.random()*.4,
+    col:PCOL[Math.floor(Math.random()*PCOL.length)],
+    sw:Math.random()*Math.PI*2, ss:.018+Math.random()*.018,
+    type:Math.random()>.45?'blossom':'petal'
+  };
+}
+
+function updateFP(){
+  fallingPetals.forEach(p=>{
+    p.sw+=p.ss; p.y+=p.vy; p.x+=p.vx+Math.sin(p.sw)*.7; p.rot+=p.rs;
+    if(p.y>sc.height+30){
+      const f=mkFallingPetal(); f.y=-10-Math.random()*60; Object.assign(p,f);
+    }
+  });
+}
+
+function drawSakura(t,time){
+  sctx.clearRect(0,0,sc.width,sc.height);
+  drawMeadow(t,time);
+
+  // branches
+  const show=Math.floor(t*branches.length);
+  for(let i=0;i<show;i++){
+    const b=branches[i];
+    const tg=b.gen/11;
+    const r=Math.round(100-tg*35),g=Math.round(58-tg*18),bv=Math.round(42-tg*12);
+    sctx.beginPath(); sctx.moveTo(b.x1,b.y1); sctx.lineTo(b.x2,b.y2);
+    sctx.strokeStyle=`rgb(${r},${g},${bv})`; sctx.lineWidth=Math.max(b.w,.5); sctx.lineCap='round'; sctx.stroke();
+  }
+  // blossoms
+  if(t>.6){
+    const bt=(t-.6)/.4, sb=Math.floor(bt*blossoms.length);
+    for(let i=0;i<sb;i++){
+      const bl=blossoms[i];
+      for(let p=0;p<5;p++){
+        const a=(p/5)*Math.PI*2-Math.PI/2;
+        sctx.beginPath(); sctx.ellipse(bl.x+Math.cos(a)*bl.r*.7,bl.y+Math.sin(a)*bl.r*.7,bl.r*.62,bl.r*.4,a,0,Math.PI*2);
+        sctx.fillStyle=bl.col; sctx.globalAlpha=.9; sctx.fill(); sctx.globalAlpha=1;
+      }
+      sctx.beginPath(); sctx.arc(bl.x,bl.y,bl.r*.22,0,Math.PI*2); sctx.fillStyle='#fff5e0'; sctx.fill();
+    }
+  }
+  // falling petals
+  fallingPetals.forEach(p=>{
+    sctx.save(); sctx.translate(p.x,p.y); sctx.rotate(p.rot*Math.PI/180); sctx.globalAlpha=p.a;
+    if(p.type==='blossom'){
+      for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2;sctx.beginPath();sctx.ellipse(Math.cos(a)*p.sz*.6,Math.sin(a)*p.sz*.6,p.sz*.55,p.sz*.33,a,0,Math.PI*2);sctx.fillStyle=p.col;sctx.fill();}
+      sctx.beginPath();sctx.arc(0,0,p.sz*.18,0,Math.PI*2);sctx.fillStyle='#fff5e0';sctx.fill();
+    } else {
+      sctx.beginPath();sctx.moveTo(0,-p.sz);sctx.bezierCurveTo(p.sz*.5,-p.sz*.5,p.sz*.5,p.sz*.5,0,p.sz);sctx.bezierCurveTo(-p.sz*.5,p.sz*.5,-p.sz*.5,-p.sz*.5,0,-p.sz);sctx.fillStyle=p.col;sctx.fill();
+    }
+    sctx.restore();
+  });
+}
+
+let sakuraRAF=null, growStart=null;
+const GROW_DUR=3000;
+
+function sakuraLoop(ts){
+  if(!sakuraActive) return;
+  if(!growStart) growStart=ts;
+  treeProgress=Math.min((ts-growStart)/GROW_DUR,1);
+  if(treeProgress>.55&&fallingPetals.length<100){
+    const burst=treeProgress>.9?5:2;
+    for(let i=0;i<burst;i++){const p=mkFallingPetal();p.y=Math.random()*sc.height*.45;fallingPetals.push(p);}
+  }
+  updateFP(); drawSakura(treeProgress,ts*.001);
+  sakuraRAF=requestAnimationFrame(sakuraLoop);
+}
+function startSakura(){ sakuraActive=true; growStart=null; treeProgress=0; fallingPetals.length=0; initTree(); initMeadow(); sakuraRAF=requestAnimationFrame(sakuraLoop); }
+function stopSakura(){ sakuraActive=false; if(sakuraRAF) cancelAnimationFrame(sakuraRAF); sctx.clearRect(0,0,sc.width,sc.height); }
+
+// ═══════════════════════════════════════════════
+//  SCENE SEQUENCER
+// ═══════════════════════════════════════════════
+const scenes=['scene1','scene2','scene3','scene4','scene5'];
+let current=0, autoTimer=null;
+
+const poemLines=[
+  {id:'pl1',t:500},{id:'pl2',t:1300},{id:'pl3',t:2100},{id:'pl4',t:2900},
+  {id:'pl5',t:4200},{id:'pl6',t:5000},{id:'pl7',t:5800},{id:'pl8',t:6600},
+  {id:'pl9',t:8000},
+];
+let poemTimers=[];
+
+function resetPoem(){
+  poemTimers.forEach(clearTimeout); poemTimers=[];
+  poemLines.forEach(({id})=>{
+    const el=document.getElementById(id);
+    if(el){el.style.transition='none';el.style.opacity='0';el.style.transform='translateY(18px)';}
+  });
+}
+function animPoem(){
+  poemLines.forEach(({id,t})=>{
+    poemTimers.push(setTimeout(()=>{
+      const el=document.getElementById(id); if(!el) return;
+      el.style.transition='opacity 1.1s ease, transform 1.1s ease';
+      el.style.opacity='1'; el.style.transform='translateY(0)';
+    },t));
+  });
+}
+
+// longer durations so text is readable
+const sceneDur=[7000, 10000, 16000, 13000, 0];
+
+const btnPrev=document.getElementById('btnPrev');
+const btnNext=document.getElementById('btnNext');
+const dots=document.querySelectorAll('.dot');
+const counter=document.getElementById('slideCounter');
+
+function updateNav(){
+  btnPrev.disabled=current===0;
+  btnNext.disabled=current===scenes.length-1;
+  dots.forEach((d,i)=>d.classList.toggle('on',i===current));
+  counter.textContent=`0${current+1} / 0${scenes.length}`;
+}
+
+function goTo(idx,fromUser){
+  if(idx<0||idx>=scenes.length) return;
+  if(fromUser&&autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  const prev=scenes[current];
+  document.getElementById(prev).classList.remove('active');
+  if(prev==='scene2') stopSakura();
+  if(current===2) resetPoem();
+  current=idx;
+  document.getElementById(scenes[current]).classList.add('active');
+  updateNav();
+  if(scenes[current]==='scene2') startSakura();
+  if(current===2) animPoem();
+  if(!fromUser&&sceneDur[current]) autoTimer=setTimeout(()=>goTo(current+1,false),sceneDur[current]);
+}
+
+autoTimer=setTimeout(()=>goTo(1,false),sceneDur[0]);
+
+btnPrev.addEventListener('click',()=>goTo(current-1,true));
+btnNext.addEventListener('click',()=>goTo(current+1,true));
+dots.forEach(d=>d.addEventListener('click',()=>goTo(+d.dataset.i,true)));
+
+document.getElementById('restartBtn').addEventListener('click',()=>{
+  resetPoem(); stopSakura(); goTo(0,true);
+  autoTimer=setTimeout(()=>goTo(1,false),sceneDur[0]);
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') goTo(current+1,true);
+  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')   goTo(current-1,true);
+});
+
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>45) goTo(dx<0?current+1:current-1,true);
+},{passive:true});
+
+updateNav();
+
+// ═══════════════════════════════════════════════
+//  MUSIC
+// ═══════════════════════════════════════════════
+const bgMusic=document.getElementById('bgMusic');
+const musicBtn=document.getElementById('musicBtn');
+let musicOn=false;
+bgMusic.volume=.5;
+
+function tryPlay(){
+  bgMusic.play().then(()=>{musicOn=true;musicBtn.classList.add('playing');musicBtn.classList.remove('muted');musicBtn.querySelector('.note').textContent='🎵';})
+  .catch(()=>{musicOn=false;musicBtn.classList.remove('playing');musicBtn.classList.add('muted');musicBtn.querySelector('.note').textContent='🔇';});
+}
+tryPlay();
+function onFirstTouch(){if(!musicOn) tryPlay();}
+document.addEventListener('touchstart',onFirstTouch,{once:true});
+document.addEventListener('click',onFirstTouch,{once:true});
+
+musicBtn.addEventListener('click',e=>{
+  e.stopPropagation();
+  if(musicOn){bgMusic.pause();musicOn=false;musicBtn.classList.remove('playing');musicBtn.classList.add('muted');musicBtn.querySelector('.note').textContent='🔇';}
+  else{bgMusic.play();musicOn=true;musicBtn.classList.add('playing');musicBtn.classList.remove('muted');musicBtn.querySelector('.note').textContent='🎵';}
+});
+
+// ═══════════════════════════════════════════════
+//  FLOATING PARTICLES
+// ═══════════════════════════════════════════════
+const pchars=['✦','✧','⋆','·','✿','✻','꩜','✽'];
+const pcols=['#e8829a','#f0b8cc','#d4a864','#f0cc90','#c8a0d8','#a0c8f0'];
+function spawnParticle(){
+  const p=document.createElement('div');
+  p.className='particle';
+  p.textContent=pchars[Math.floor(Math.random()*pchars.length)];
+  p.style.left=Math.random()*100+'vw';
+  p.style.bottom='-8px';
+  p.style.color=pcols[Math.floor(Math.random()*pcols.length)];
+  const dur=14+Math.random()*16;
+  p.style.animationDuration=dur+'s';
+  p.style.animationDelay=Math.random()*4+'s';
+  p.style.fontSize=(.45+Math.random()*.7)+'rem';
+  p.style.filter=`drop-shadow(0 0 4px ${pcols[Math.floor(Math.random()*pcols.length)]})`;
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),(dur+6)*1000);
+}
+setInterval(spawnParticle,900);
+for(let i=0;i<12;i++) setTimeout(spawnParticle,i*180);
+</script>
+</body>
+</html>
